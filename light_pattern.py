@@ -34,22 +34,19 @@ delay = 0.2
 def update_pattern(): # Thread 1
     global mode
     while True:
-        buzzer_state() # Sound buzzer (prevents a seperate thread)
+        buzzer.on() if speed_buzz or width_buzz else buzzer.off()
         for i in range(10):
             leds[i].value = pattern[i]
         sleep(delay)
         if mode == "cycle":
             cycle(direction)
-        elif mode == "backnforth": # No else statement for program precision
+        else:
             backnforth()
 
 # A simple toggle using meaningful values (opposed to True or False)
 def toggleMode():
     global mode
-    if mode == "cycle":
-        mode = "backnforth"
-    elif mode == "backnforth":
-        mode = "cycle"
+    mode = 'backnforth' if mode == 'cycle' else 'cycle'
 
 # A function to rearrange a pattern by directly modifying it (I know) using a specified direction
 def cycle(direction): # VOID
@@ -62,10 +59,7 @@ def cycle(direction): # VOID
 # A simple toggle using meaningful values (opposed to True or False)
 def toggle_cycle_direction():
     global direction
-    if direction == "left":
-        direction = "right"
-    elif direction == "right":
-        direction = "left"
+    direction = "right" if direction == "left" else "left"
 
 # A function that utilizes the directional values of the cycle() function when a pattern reaches the end of the component
 def backnforth(): # VOID
@@ -77,10 +71,7 @@ def backnforth(): # VOID
         direction = "left"
         cycle('right')
     else:
-        if direction == "left":
-            cycle('right')
-        elif direction == "right":
-            cycle('left')
+        cycle('right') if direction == "left" else cycle('left')
 
 # A way to read converted analog values from different potentiometers
 ads7830_commands = [0x84, 0xc4]
@@ -124,13 +115,6 @@ def updateWidth():
         else:
             width_buzz = False
         sleep(0.2)
-
-# A function to prevent thread conflicts for buzzer sounds
-def buzzer_state():
-    if speed_buzz or width_buzz:
-        buzzer.on()
-    else:
-        buzzer.off()
 
 # Run the program
 try:
